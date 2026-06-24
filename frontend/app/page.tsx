@@ -35,7 +35,7 @@ export default function Home() {
       setStatus("Uploading resume...");
 
       const response = await axios.post(
-        "http://127.0.0.1:8000/customize",
+        "https://resume-customizer-backend.onrender.com/customize",
         formData
       );
 
