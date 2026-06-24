@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import axios from "axios";
+import ReactMarkdown from "react-markdown";
 
 export default function Home() {
 
@@ -34,7 +35,7 @@ export default function Home() {
       setStatus("Uploading resume...");
 
       const response = await axios.post(
-        "https://resume-customizer-backend.onrender.com/customize",
+        "http://127.0.0.1:8000/customize",
         formData
       );
 
@@ -173,20 +174,19 @@ export default function Home() {
 
         )}
 
-        <pre
+        <div
           className="
-            whitespace-pre-wrap
             border
             p-6
-            rounded-lg
-            bg-gray-50
+            rounded
+            bg-white
             text-black
-            overflow-auto
-            max-h-[600px]
           "
         >
-          {result}
-        </pre>
+          <ReactMarkdown>
+            {result}
+          </ReactMarkdown>
+        </div>
 
       </div>
 

@@ -15,68 +15,100 @@ model = genai.GenerativeModel(
     "gemini-2.5-flash"
 )
 
-
 def customize_resume(resume_text, jd_text):
 
-    prompt = f"""
-You are an expert ATS Resume Optimizer and Career Coach.
-
-Your task is to customize a candidate's resume according to the given Job Description.
-
-IMPORTANT RULES:
-1. Do NOT invent fake work experience.
-2. Do NOT invent fake projects.
-3. Do NOT invent fake achievements.
-4. Improve wording and presentation only.
-5. Reorder skills and experience based on relevance to the JD.
-6. Add ATS-friendly keywords where appropriate.
-7. Keep the resume professional and concise.
+   prompt = f"""
+You are a professional ATS Resume Writer.
 
 JOB DESCRIPTION:
-------------------------------------------------
 {jd_text}
-------------------------------------------------
 
-CANDIDATE RESUME:
-------------------------------------------------
+ORIGINAL RESUME:
 {resume_text}
+
+OBJECTIVE:
+Create an ATS-optimized version of the resume tailored to the Job Description.
+
+IMPORTANT RULES:
+
+1. The resume MUST start with the candidate information extracted from the original resume:
+   - Name
+   - Email
+   - Phone
+   - LinkedIn/GitHub (if present)
+
+2. Do NOT start with:
+   - ATS Score
+   - Matching Skills
+   - Missing Skills
+   - ATS Analysis
+   - Suggestions
+   - Recommendations
+
+3. Do NOT write headings such as:
+   - Customized Skills Section
+   - Customized Work Experience Section
+   - Customized Projects Section
+   - Customized Resume
+
+4. Write the resume exactly like a professional job-ready resume.
+
+5. Use only professional resume section titles such as:
+   - Professional Summary
+   - Education
+   - Work Experience
+   - Internship Experience
+   - Projects
+   - Technical Skills
+   - Positions of Responsibility
+   - Certifications
+   - Relevant Coursework
+
+6. Reorder sections according to JD relevance.
+   Example:
+   AI/ML Role:
+   Summary → Experience → Projects → Skills → Education → POR
+
+   Mechanical Role:
+   Summary → Education → Experience → Projects → Skills → POR
+
+7. Never place ATS analysis inside the resume.
+
+8. Resume should appear as a final resume ready to submit.
+
 ------------------------------------------------
 
-Return the response in the following format:
+AFTER THE COMPLETE RESUME ONLY:
 
-# ATS MATCH ANALYSIS
+# ATS ANALYSIS
 
-- Matching Skills:
-- Missing Skills:
-- Suggested Keywords:
+## ATS SCORE
 
-# CUSTOMIZED PROFESSIONAL SUMMARY
+Calculate ATS score using:
 
-(Write an improved summary aligned with the JD)
+- Skills Match = 40%
+- Experience Match = 30%
+- Projects Match = 20%
+- Education Match = 10%
 
-# CUSTOMIZED SKILLS SECTION
+Provide:
+- ATS Score
+- Matching Skills
+- Missing Skills
+- Improvement Suggestions
 
-(Reorder and highlight relevant skills)
+The ATS Analysis must appear ONLY AFTER the complete resume.
 
-# CUSTOMIZED EXPERIENCE SECTION
-
-(Rewrite experience bullets to emphasize JD relevance)
-
-# IMPROVEMENT SUGGESTIONS
-
-(List missing skills, certifications, tools, or keywords)
-
-# FINAL ATS SCORE
-
-(Estimate ATS score out of 100 and explain briefly)
+Return only the final formatted resume followed by ATS Analysis.
 """
 
-    try:
+   
+   try:
 
-        response = model.generate_content(prompt)
+      response = model.generate_content(prompt)
 
-        return response.text
+      return response.text
 
-    except Exception as e:
+   except Exception as e:
 
-        return f"Error generating resume: {str(e)}"
+      return f"Error generating resume: {str(e)}"
