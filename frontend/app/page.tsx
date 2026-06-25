@@ -11,18 +11,34 @@ export default function Home() {
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
+
   const handleSubmit = async () => {
 
-    if (!jd) {
-      alert("Please enter Job Description");
+    if (!jd.trim()) {
+      alert("Please enter Job Description.");
+      return;
+    }
+
+    if (jd.trim().length < 100) {
+      alert("Job Description must contain at least 100 characters.");
       return;
     }
 
     if (!file) {
-      alert("Please upload resume");
+      alert("Please upload a resume.");
       return;
     }
 
+    if (file.type !== "application/pdf") {
+      alert("Only PDF files are allowed.");
+      return;
+    }
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
+    if (file.size > MAX_FILE_SIZE) {
+      alert("Resume size should not exceed 5 MB.");
+      return;
+    }
     const formData = new FormData();
 
     formData.append("jd", jd);
@@ -43,9 +59,12 @@ export default function Home() {
         "Resume customized successfully!"
       );
 
-      setResult(
-        response.data.customized_resume
-      );
+      const fullResponse =
+        response.data.customized_resume;
+
+
+
+      setResult(fullResponse);
 
     } catch (error) {
 
@@ -65,76 +84,140 @@ export default function Home() {
   };
 
   return (
-    <main className="p-8 max-w-5xl mx-auto">
+    <main className="min-h-screen bg-slate-100 p-8">
 
-      <h1 className="text-4xl font-bold mb-2">
-        AI Resume Customizer
-      </h1>
+      <div className="max-w-screen-xl mx-auto">
+        <h1 className="text-5xl font-extrabold text-slate-800 mb-3">
+          AI Resume Customizer
+        </h1>
 
-      <p className="text-gray-600 mb-8">
-        Upload your resume and paste a Job Description
-        to generate an ATS-optimized version.
-      </p>
+        <p className="text-slate-600 text-lg mb-10">
+          Upload your resume, paste the job description, and generate an ATS-optimized resume tailored for your target role.
+        </p>
 
-      <div className="space-y-4">
+        <div className="
+                      bg-white
+                      shadow-xl
+                      rounded-2xl
+                      p-6
+                      space-y-4
+                      border
+                      border-slate-200
+                      ">
 
-        <textarea
-          className="w-full border p-3 rounded"
-          rows={10}
-          placeholder="Paste Job Description Here..."
-          value={jd}
-          onChange={(e) =>
-            setJd(e.target.value)
-          }
-        />
-
-        <input
-          type="file"
-          accept=".pdf"
-          className="border p-2 rounded"
-          onChange={(e) =>
-            setFile(
-              e.target.files?.[0] || null
-            )
-          }
-        />
-
-        {file && (
-          <p className="text-green-600 font-medium">
-            Selected File: {file.name}
-          </p>
-        )}
-
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className="
-            bg-blue-600
-            hover:bg-blue-700
-            text-white
-            px-6
-            py-3
-            rounded
-            disabled:bg-gray-400
-          "
-        >
-          {loading
-            ? "Generating Customized Resume..."
-            : "Customize Resume"}
-        </button>
-
-      </div>
-
-      <div className="mt-10">
-
-        <h2 className="text-2xl font-bold mb-4">
-          Customized Resume
-        </h2>
-
-        {result && (
-
-          <button
+          <textarea
             className="
+                    w-full
+                    border
+                    border-slate-300
+                    p-4
+                    rounded-xl
+                    focus:outline-none
+                    focus:ring-2
+                    focus:ring-blue-500
+                    text-black
+                    "
+            rows={10}
+            placeholder="Paste Job Description Here..."
+            value={jd}
+            onChange={(e) =>
+              setJd(e.target.value)
+            }
+          />
+
+          <div className="flex items-center justify-between">
+
+            <div>
+
+              <label
+                className="
+        inline-block
+        bg-slate-100
+        hover:bg-slate-200
+        border
+        border-slate-300
+        text-slate-800
+        px-5
+        py-3
+        rounded-xl
+        cursor-pointer
+        font-medium
+        transition
+      "
+              >
+                📄 Upload Resume
+
+                <input
+                  type="file"
+                  accept=".pdf"
+                  className="hidden"
+                  onChange={(e) =>
+                    setFile(e.target.files?.[0] || null)
+                  }
+                />
+              </label>
+
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="
+      bg-blue-600
+      hover:bg-blue-700
+      transition
+      text-white
+      font-semibold
+      px-8
+      py-3
+      rounded-xl
+      shadow-md
+      disabled:bg-gray-400
+    "
+            >
+              {loading
+                ? "🤖 Optimizing Resume..."
+                : "Customize Resume"}
+            </button>
+
+
+          </div>
+          {file && (
+            <div
+              className="
+      bg-green-50
+      border
+      border-green-200
+      rounded-xl
+      p-3
+      text-green-700
+    "
+            >
+              ✓ Resume Uploaded: <strong>{file.name}</strong>
+
+              <br />
+
+              Size: {
+                file.size < 1024 * 1024
+                  ? `${(file.size / 1024).toFixed(1)} KB`
+                  : `${(file.size / (1024 * 1024)).toFixed(2)} MB`
+              }
+            </div>
+          )}
+
+        </div>
+
+
+        <div className="mt-12">
+
+          <h2 className="text-2xl font-bold mb-4 text-slate-800">
+            Customized Resume
+          </h2>
+
+          {result && (
+
+            <button
+              className="
               bg-green-600
               hover:bg-green-700
               text-white
@@ -143,52 +226,63 @@ export default function Home() {
               rounded
               mb-4
             "
-            onClick={() => {
+              onClick={() => {
 
-              const blob = new Blob(
-                [result],
-                {
-                  type: "text/plain"
-                }
-              );
-
-              const url =
-                window.URL.createObjectURL(
-                  blob
+                const blob = new Blob(
+                  [result],
+                  {
+                    type: "text/plain"
+                  }
                 );
 
-              const a =
-                document.createElement("a");
+                const url =
+                  window.URL.createObjectURL(
+                    blob
+                  );
 
-              a.href = url;
+                const a =
+                  document.createElement("a");
 
-              a.download =
-                "customized_resume.txt";
+                a.href = url;
 
-              a.click();
+                a.download =
+                  "customized_resume.txt";
 
-            }}
-          >
-            Download Resume
-          </button>
+                a.click();
 
-        )}
+              }}
+            >
+              Download Resume
+            </button>
 
-        <div
-          className="
-            border
-            p-6
-            rounded
-            bg-white
-            text-black
+          )}
+
+          <div
+            className="
+          bg-white
+          p-8
+          rounded-2xl
+          shadow-lg
+          border
+          border-slate-200
           "
-        >
-          <ReactMarkdown>
-            {result}
-          </ReactMarkdown>
-        </div>
+          >
 
+            <div className="prose prose-slate max-w-none text-black">
+
+              <ReactMarkdown>
+                {result}
+              </ReactMarkdown>
+
+            </div>
+
+          </div>
+
+
+
+        </div>
       </div>
+
 
     </main>
   );
